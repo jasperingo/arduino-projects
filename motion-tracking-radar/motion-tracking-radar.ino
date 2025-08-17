@@ -5,6 +5,7 @@
 #define SERVO_MAX 160
 #define SERVO_STEP 4
 #define ULTRASOUND_DELAY 10
+#define SOUND_SPEED 0.0343 // speed of sound in centimeters per microsecond
 
 const uint8_t servo_pin = 6;
 const uint8_t buzzer_pin = 9;
@@ -60,6 +61,7 @@ void loop() {
 
   uint32_t current_time = millis();
 
+  // Read distance from object with ultrasound
   digitalWrite(ultrasound_out_pin, HIGH);
   delayMicroseconds(ULTRASOUND_DELAY);
 
@@ -71,16 +73,18 @@ void loop() {
 	Serial.print(duration);  
   Serial.print(" us - ");
 
-  // convert time to distance
-  distance = (duration * 0.0343) / 2;
+  // Convert time to distance
+  // Divide it by 2 because the sound waves travel to the object and back
+  distance = (duration * SOUND_SPEED) / 2;
 
   Serial.print("Distance: ");  
 	Serial.print(distance);  
   Serial.println(" cm");
 
-  
+  // Toggle positive LED based on if there is object or not
   digitalWrite(positive_led_pin, distance > distance_threshold ? HIGH : LOW);
 
+  // Display message on LCD based on if there is object or not
   if (!lcd_is_error && distance < distance_threshold) {
     lcd.clear();
     lcd.print("Warning!!!");
@@ -97,10 +101,12 @@ void loop() {
     previous_time = current_time;
 
     if (distance < distance_threshold) {
+      // Toggle negative LED when object exist at time interval
       negative_led_state = negative_led_state == LOW ? HIGH : LOW;
 
       digitalWrite(negative_led_pin, negative_led_state);
 
+      // Toggle buzzer when object exist at time interval
       if (buzzer_buzz) {
         buzzer_buzz = false;
         tone(buzzer_pin, buzzer_tone);
@@ -109,13 +115,16 @@ void loop() {
         noTone(buzzer_pin);
       }
     } else {
+      // Turn off negative LED when no object
       negative_led_state = LOW;
       digitalWrite(negative_led_pin, negative_led_state);
 
+      // Turn off buzzer when no object
       buzzer_buzz = true;
       noTone(buzzer_pin);
   
-    
+
+      // Move the servo only when there is no object at time interval
       servo_angle = servo_to_zero ? (servo_angle - SERVO_STEP) : (servo_angle + SERVO_STEP);
 
       Serial.print("Servo angel: ");
