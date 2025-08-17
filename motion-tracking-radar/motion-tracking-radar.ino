@@ -1,3 +1,13 @@
+/**
+ * Inspired by project from YouTube: https://www.youtube.com/watch?v=IIe3DMzaRSA
+ * This project uses two LEDs, one LCD, Servo motor, Piezo buzzer & Ultrasound sensor
+ * The utltrasound sensor is set up on the servo which rotates it to scan for object within a distance
+ * If an object is found, the servo stops rotating, the buzzer starts buzzing and the red LED starts blinking
+ * The LCD also displays a warning messsge denoting the presence of an object
+ * On the other hand, the servo continues rotating, the buzzer and red LED are turned off and the positive LED is turned on
+ * The LCD also displayes a message denoting the absence of an object
+*/
+
 #include <Servo.h>
 #include <LiquidCrystal_I2C.h>
 
@@ -15,7 +25,7 @@ const uint8_t ultrasound_in_pin = 7;
 const uint8_t ultrasound_out_pin = 4;
 const uint32_t buzzer_tone = 1500;
 const uint32_t action_interval = 20;
-const uint8_t distance_threshold = 30;
+const uint8_t distance_threshold = 20;
 
 Servo servo;
 LiquidCrystal_I2C lcd(0x27, 16, 2);
