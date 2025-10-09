@@ -1,3 +1,16 @@
+/**
+ * Inspired by project from YouTube: https://www.youtube.com/shorts/Zy0sGvEWFmc
+ * This project uses two LEDs, one LCD, four push buttons, breadboard, and Piezo buzzer
+ * The buttons are set up on a breadboard with pull-down resistors to detect button presses
+ * First button is the mode button, this sets the timer state to seconds, minutes, hours or start
+ * Second button is the time button, which is used to set the timer based on the mode selected apart from start mode
+ * Third button is the reset button, which is used to reset all the time set up and can even stop the count down
+ * Forth button is the start button, used to start the count down when the mode is start
+ * The LCD displays the mode of the timer according as well as the current time
+ * The red LED blinks when a button is pressed. It is used as an extra feedback for a button press
+ * The green LED blinks while the count down is in progress
+ * The buzzer plays a tone when the count down is complete
+*/
 
 #include <LiquidCrystal_I2C.h>
 
