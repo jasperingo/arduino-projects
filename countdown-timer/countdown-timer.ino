@@ -9,43 +9,57 @@
 #define MINUTE_SECONDS 60
 #define SECOND_MIN 0
 #define SECOND_MAX 59
+#define COUNT_DOWN_MILLIS 1000
+#define BUZZER_TONE 1500
+#define BUZZER_DURATION 4000
 
 enum Mode { ModeStart, ModeHours, ModeMinutes, ModeSeconds };
 
-const unsigned int led_pin = 7;
-const unsigned int mode_button_pin = 2;
-const unsigned int start_button_pin = 5;
-const unsigned int reset_button_pin = 3;
-const unsigned int time_button_pin = 4;
+const uint8_t buzzer_pin = 9;
+const uint8_t press_led_pin = 7;
+const uint8_t count_led_pin = 8;
+const uint8_t mode_button_pin = 2;
+const uint8_t start_button_pin = 5;
+const uint8_t reset_button_pin = 3;
+const uint8_t time_button_pin = 4;
 
-const unsigned int debounce_delay = 50;
+const uint8_t debounce_delay = 50;
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 Mode timer_mode = ModeStart;
 
+uint8_t count_led_previous_state = LOW;
 uint8_t mode_button_previous_state = LOW;
 uint8_t time_button_previous_state = LOW;
+uint8_t reset_button_previous_state = LOW;
+uint8_t start_button_previous_state = LOW;
 
 uint8_t hours = 0;
 uint8_t minutes = 0;
 uint8_t seconds = 0;
 
+uint32_t count_down_seconds = 0;
+
+uint32_t previous_time = 0;
+
 void setup() {
   Serial.begin(9600);
 
-  pinMode(led_pin, OUTPUT);
+  pinMode(press_led_pin, OUTPUT);
+  pinMode(count_led_pin, OUTPUT);
   pinMode(mode_button_pin, INPUT);
   pinMode(start_button_pin, INPUT);
   pinMode(reset_button_pin, INPUT);
   pinMode(time_button_pin, INPUT);
 
+  pinMode(buzzer_pin, OUTPUT);
+  noTone(buzzer_pin);
+
   lcd.init();
   lcd.backlight();
   lcd.clear();
-  lcd.print("Timer");
-  lcd.setCursor(0, 1);
-  lcd.print("00 : 00 : 00");
+  printToScreen();
 }
 
 void loop() {
@@ -54,22 +68,71 @@ void loop() {
   unsigned int mode_button_state = digitalRead(mode_button_pin);
   unsigned int time_button_state = digitalRead(time_button_pin);
 
-  if (start_button_state == HIGH || reset_button_state == HIGH || mode_button_state == HIGH || time_button_state == HIGH) {   
-    digitalWrite(led_pin, HIGH);
+  if (
+    start_button_state == HIGH || 
+    reset_button_state == HIGH || 
+    mode_button_state == HIGH || 
+    time_button_state == HIGH
+  ) {
+    digitalWrite(press_led_pin, HIGH);
   } else {
-    digitalWrite(led_pin, LOW);
+    digitalWrite(press_led_pin, LOW);
   }
 
-  if (mode_button_state == LOW && mode_button_previous_state == HIGH) {
+  if (count_down_seconds == 0 && mode_button_state == LOW && mode_button_previous_state == HIGH) {
     changeMode();
-  }
-
-  if (time_button_state == LOW && time_button_previous_state == HIGH) {
+  } else if (count_down_seconds == 0 && time_button_state == LOW && time_button_previous_state == HIGH) {
     changeTime();
+  } else if (count_down_seconds == 0 && timer_mode == ModeStart && start_button_state == LOW && start_button_previous_state == HIGH) {
+    count_down_seconds = (hours * HOUR_SECONDS) + (minutes * MINUTE_SECONDS) + seconds;
+  } else if (reset_button_state == LOW && reset_button_previous_state == HIGH) {
+    resetTimer();
   }
 
   mode_button_previous_state = mode_button_state;
   time_button_previous_state = time_button_state;
+  reset_button_previous_state = reset_button_state;
+  start_button_previous_state = start_button_state;
+
+  if (count_down_seconds > 0) {
+    uint32_t current_time = millis();
+
+    if ((current_time - previous_time) >= COUNT_DOWN_MILLIS) {
+      previous_time = current_time;
+
+      count_down_seconds--;
+
+      uint8_t count_led_state = count_down_seconds == 0 ? LOW : (count_led_previous_state == HIGH ? LOW : HIGH);
+
+      digitalWrite(count_led_pin, count_led_state);
+
+      count_led_previous_state = count_led_state;
+
+      if (count_down_seconds == 0) {
+        tone(buzzer_pin, BUZZER_TONE, BUZZER_DURATION);
+      }
+
+      hours = count_down_seconds / HOUR_SECONDS; // 1 hour = 3600 seconds
+
+      // Calculate remaining minutes after extracting hours
+      minutes = (count_down_seconds % HOUR_SECONDS) / MINUTE_SECONDS; // 1 minute = 60 seconds
+
+      // Calculate remaining seconds
+      seconds = count_down_seconds % MINUTE_SECONDS;
+
+      printToScreen();
+    }
+  }
+}
+
+void resetTimer() {
+  timer_mode = ModeStart;
+  seconds = 0;
+  minutes = 0;
+  hours = 0;
+  count_down_seconds = 0;
+
+  printToScreen();
 }
 
 void changeMode() {
@@ -149,25 +212,3 @@ void printToScreen() {
 
   lcd.print(seconds);
 }
-
-// uint32_t previous_time = 0;
-// uint8_t mode_button_current_state = LOW;
-// uint8_t mode_button_previous_state = LOW;
-  // if (mode_button_state != mode_button_previous_state) {
-  //   Serial.println("a");
-  //   previous_time = current_time;
-  // }
-
-  // if (current_time > (previous_time + debounce_delay)) {
-  //   Serial.println("b");
-  //   if (mode_button_state != mode_button_current_state) {
-  //     mode_button_current_state = mode_button_state;
-
-  //     if (mode_button_current_state == HIGH) {
-  //       changeMode();
-  //     }
-  //   }
-  // }
-
-  // mode_button_previous_state = mode_button_state;
-
