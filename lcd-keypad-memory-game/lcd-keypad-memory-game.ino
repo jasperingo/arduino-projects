@@ -1,3 +1,19 @@
+/**
+ * Inspired by project from YouTube: https://www.youtube.com/shorts/qddrlRVFplk
+ * This project uses a keypad, one LCD, breadboard, and Piezo buzzer
+ * The keypad is a 4x4 keypad and is connected to the board pin
+ * The button A on the keypad is used to start the game
+ * The buttons 1 - 9 on the keypad are used to input number generated during the memorize mode
+ * The LCD displays the mode of the game as well as the data or instruction
+ * The buzzer plays a tone on key presses and generation for memorizing
+ * The start mode waits for the player to press the A key and changes the mode to memorize
+ * The memorize mode generates a character from 1 - 9 at a one second interval 
+ * The generated key is displays it on the LCD and its associated tone is played
+ * After all keys are generated for a level the mode is change to play
+ * In play the user inputs are displayed on the LCD and compared with the generated keys
+ * If correct, the tone is played and the user is allowed to enter the next key else the mode is changed to failed
+ * When all correct keys are entered, the level is incremented and mode is changed by to memorize
+*/
 
 #include <Keypad.h>
 #include <LiquidCrystal_I2C.h>
