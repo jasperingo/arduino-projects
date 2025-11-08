@@ -1,3 +1,15 @@
+/**
+ * This project uses a 2WD Chassis, 2 DC motors, L298N motor driver, a switch, and Ultrasound sensor
+ * The DC motors are connected to the motor driver
+ * The power supply is connected to the motor driver and board through the switch
+ * The motor driver is connected to output pins on the board
+ * The motor driver translates digital voltages from the pins and uses it to control the DC motors rotation
+ * Setting both pins of a DC motor to LOW stops rotation
+ * Setting one pin HIGH and the other LOW is used to control the rotation direction of the DC motor
+ * The car can be rotated by stopping one DC motor and making the other one rotate
+ * The ultrasound sensor reads the distance from the car to any object ahead of it
+ * If the distance is too close, the car is rotated in either direction (left, right) to avoid hitting the object
+*/
 
 #define ULTRASOUND_DELAY 10
 #define SOUND_SPEED 0.0343 // speed of sound in centimeters per microsecond
