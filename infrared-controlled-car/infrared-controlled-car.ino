@@ -1,3 +1,18 @@
+/**
+ * This project uses a 2WD Chassis, 2 DC motors, L298N motor driver, a switch, Infrared sensor, and Infrared remote
+ * The DC motors are connected to the motor driver
+ * The power supply is connected to the motor driver and board through the switch
+ * The motor driver is connected to output pins on the board
+ * The motor driver translates digital voltages from the pins and uses it to control the DC motors rotation
+ * Setting both pins of a DC motor to LOW stops rotation
+ * Setting one pin HIGH and the other LOW is used to control the rotation direction of the DC motor
+ * The car can be rotated by stopping one DC motor and making the other one rotate
+ * The infrared sensor transalates key presses from the remote to motion change or speed change
+ * The arrow keys are used to control the movement in different directions
+ * The OK (center) key is used to stop the movement
+ * The keys 1 - 9 are used to change the motor rotation speeds using pulse width modulation
+*/
+
 #include <IRremote.hpp>
 
 #define ONE_REMOTE_KEY 0xBA45FF00
